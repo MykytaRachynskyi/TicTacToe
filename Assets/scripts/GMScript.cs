@@ -1,12 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 
 public class GMScript : MonoBehaviour {
 
 	public bool playerOneTurn;
-	public GameObject boardBlock;
+	public GameObject boardBlock, gridLine;
 	public Transform canvasParent;
 	public int activeCount = 0;
 	public float blockSize = 250f;
@@ -18,13 +17,16 @@ public class GMScript : MonoBehaviour {
 	public float animSpeed = 2f;
 
 	private GameObject copy;
-	private GameObject lineHolder;
+	private GameObject lineHolder, gridHolder;
 	private Text text;
 	private GameObject textGOobj;
 	private GameObject[] clone = new GameObject[9];
 	private ButtonScript[] instance = new ButtonScript[9];
 	private bool waited;
 	private Animation anim;
+
+
+	ButtonScript btnscrpt;
 
 	void Awake ()
 	{
@@ -53,29 +55,71 @@ public class GMScript : MonoBehaviour {
 		
 	}
 
-	public void LoadMenu ()
+	void DrawGrid (int i)
 	{
-		SceneManager.LoadScene("menu");
+		Vector3 gridPos = Vector3.zero;
+		switch (i) {
+			case 0:
+				gridPos = new Vector3 (-blockSize/2,0 ,0) + Vector3.right * boardOffset;
+				gridHolder=Instantiate (gridLine, gridPos, Quaternion.Euler(0,0,-90), canvasParent) as GameObject;
+				gridHolder.transform.localPosition = gridPos;
+				break;
+			case 1:
+				gridPos = new Vector3 (blockSize/2, 0 ,0) + Vector3.right * boardOffset;
+				gridHolder=Instantiate (gridLine, gridPos, Quaternion.Euler(0,0,-90), canvasParent) as GameObject;
+				gridHolder.transform.localPosition = gridPos;
+				break;
+			case 2:
+				gridPos = new Vector3 (0, blockSize/2 ,0) + Vector3.right * boardOffset;
+				gridHolder=Instantiate (gridLine, gridPos, Quaternion.Euler(0,0,0), canvasParent) as GameObject;
+				gridHolder.transform.localPosition = gridPos;
+				break;
+			case 3:
+				gridPos = new Vector3 (0, -blockSize/2 ,0) + Vector3.right * boardOffset;
+				gridHolder=Instantiate (gridLine, gridPos, Quaternion.Euler(0,0,0), canvasParent) as GameObject;
+				gridHolder.transform.localPosition = gridPos;
+				break;
+		}
 	}
+
+
 
 	void CreateBoard ()
 	{
 		Vector3 pos = Vector3.zero;
-		for (int i = 0; i < 9; i++) 
-		{
-			switch (i)
-			{
-				case 0: pos = new Vector3 (-blockSize, blockSize, 0) +  Vector3.right*boardOffset; break;
-				case 1: pos = new Vector3 (0,blockSize, 0)           +	Vector3.right*boardOffset; break;
-				case 2: pos = new Vector3 (blockSize,blockSize, 0)   + 	Vector3.right*boardOffset; break;
-				case 3: pos = new Vector3 (-blockSize, 0, 0)         +  Vector3.right*boardOffset; break;
-				case 4: pos = new Vector3 (0,0,0)					 +  Vector3.right*boardOffset; break;
-				case 5: pos = new Vector3 (blockSize,0,0)			 +	Vector3.right*boardOffset; break;
-				case 6: pos = new Vector3 (-blockSize,-blockSize,0)  + 	Vector3.right*boardOffset; break;
-				case 7: pos = new Vector3 (0,-blockSize,0)           +	Vector3.right*boardOffset; break;
-				case 8: pos = new Vector3 (blockSize,-blockSize,0)   + 	Vector3.right*boardOffset; break;
+		for (int i = 0; i < 9; i++) {
+			switch (i) {
+			case 0:
+				pos = new Vector3 (-blockSize, blockSize, 0) + Vector3.right * boardOffset;
+				break;
+			case 1:
+				pos = new Vector3 (0, blockSize, 0) +	Vector3.right * boardOffset;
+				break;
+			case 2:
+				pos = new Vector3 (blockSize, blockSize, 0) + Vector3.right * boardOffset;
+				break;
+			case 3:
+				pos = new Vector3 (-blockSize, 0, 0) + Vector3.right * boardOffset;
+				break;
+			case 4:
+				pos = new Vector3 (0, 0, 0) + Vector3.right * boardOffset;
+				break;
+			case 5:
+				pos = new Vector3 (blockSize, 0, 0) +	Vector3.right * boardOffset;
+				break;
+			case 6:
+				pos = new Vector3 (-blockSize, -blockSize, 0) + Vector3.right * boardOffset;
+				break;
+			case 7:
+				pos = new Vector3 (0, -blockSize, 0) +	Vector3.right * boardOffset;
+				break;
+			case 8:
+				pos = new Vector3 (blockSize, -blockSize, 0) + Vector3.right * boardOffset;
+				break;
 			}
-			BoardBlockInfo(i,pos);
+			BoardBlockInfo (i, pos);
+			if (i<4)
+				DrawGrid(i);
 		}
 	}
 
@@ -91,35 +135,35 @@ public class GMScript : MonoBehaviour {
 			 if (instance[0].cellValue != ButtonScript.Value.none && 
 			     instance[0].cellValue == instance[1].cellValue && 
 				 instance[0].cellValue == instance[2].cellValue)
-				 StartCoroutine(GameOver(pOneVictory, "hTop"));
+				 StartCoroutine(GameOver(false, pOneVictory, "hTop"));
 		else if (instance[3].cellValue != ButtonScript.Value.none && 
 				 instance[3].cellValue == instance[4].cellValue && 
 				 instance[3].cellValue == instance[5].cellValue)
-			     StartCoroutine(GameOver(pOneVictory, "hMid"));
+			     StartCoroutine(GameOver(false, pOneVictory, "hMid"));
 		else if (instance[6].cellValue != ButtonScript.Value.none && 
 				 instance[6].cellValue == instance[7].cellValue && 
 				 instance[6].cellValue == instance[8].cellValue)
-				 StartCoroutine(GameOver(pOneVictory,"hBot"));
+				 StartCoroutine(GameOver(false, pOneVictory,"hBot"));
 		else if (instance[0].cellValue != ButtonScript.Value.none && 
 				 instance[0].cellValue == instance[4].cellValue && 
 				 instance[0].cellValue == instance[8].cellValue)
-				 StartCoroutine(GameOver(pOneVictory, "dLR"));
+				 StartCoroutine(GameOver(false, pOneVictory, "dLR"));
 		else if (instance[2].cellValue != ButtonScript.Value.none && 
 				 instance[2].cellValue == instance[4].cellValue && 
 				 instance[2].cellValue == instance[6].cellValue)
-				 StartCoroutine(GameOver(pOneVictory, "dRL"));
+				 StartCoroutine(GameOver(false, pOneVictory, "dRL"));
 		else if (instance[0].cellValue != ButtonScript.Value.none && 
 				 instance[0].cellValue == instance[3].cellValue && 
 				 instance[0].cellValue == instance[6].cellValue)
-				 StartCoroutine(GameOver(pOneVictory, "vLeft"));
+				 StartCoroutine(GameOver(false, pOneVictory, "vLeft"));
 		else if (instance[1].cellValue != ButtonScript.Value.none && 
 				 instance[1].cellValue == instance[4].cellValue && 
 				 instance[1].cellValue == instance[7].cellValue)
-				 StartCoroutine(GameOver(pOneVictory, "vMid"));
+				 StartCoroutine(GameOver(false, pOneVictory, "vMid"));
 		else if (instance[2].cellValue != ButtonScript.Value.none && 
 				 instance[2].cellValue == instance[5].cellValue && 
 				 instance[2].cellValue == instance[8].cellValue)
-				 StartCoroutine(GameOver(pOneVictory, "vRight"));
+				 StartCoroutine(GameOver(false, pOneVictory, "vRight"));
 	}
 
 	void BoardBlockInfo (int i, Vector3 pos)
@@ -130,20 +174,35 @@ public class GMScript : MonoBehaviour {
 		clone[i].transform.localPosition = pos;
 	}
 
-	IEnumerator GameOver (bool pOneVictory, string victoryIndex)
+	IEnumerator GameOver (bool tie, bool pOneVictory, string victoryIndex)
 	{
-		boardScreen.interactable = false;
-		boardScreen.blocksRaycasts = false;
-		DrawLineAcross(victoryIndex);
-		yield return new WaitForSeconds (waitTime);
-		victoryScreen.alpha = 1f;
-		victoryScreen.interactable = true;
-		victoryScreen.blocksRaycasts = true;
-		if (pOneVictory) {
-			victoryText.text = ("Player 1 Wins!");
-		} else if (!pOneVictory) {
-			victoryText.text = ("Player 2 Wins!");
+		if (!tie) {
+			boardScreen.interactable = false;
+			boardScreen.blocksRaycasts = false;
+			DrawLineAcross (victoryIndex);
+			yield return new WaitForSeconds (waitTime);
+			victoryScreen.alpha = 1f;
+			victoryScreen.interactable = true;
+			victoryScreen.blocksRaycasts = true;
+			if (pOneVictory) {
+				victoryText.text = ("Player 1 Wins!");
+			} else if (!pOneVictory) {
+				victoryText.text = ("Player 2 Wins!");
+			}
+		} else {
+			boardScreen.interactable = false;
+			boardScreen.blocksRaycasts = false;
+			yield return new WaitForSeconds (waitTime);
+			victoryScreen.alpha = 1f;
+			victoryScreen.interactable = true;
+			victoryScreen.blocksRaycasts = true;
+			victoryText.text = ("It's a Tie!");
 		}
+	}
+
+	public void Tie ()
+	{
+		StartCoroutine(GameOver(true, true, "null"));
 	}
 
 	public void ResetGame ()
@@ -165,16 +224,33 @@ public class GMScript : MonoBehaviour {
 
 	void DrawLineAcross (string victoryIndex)
 	{
-		switch (victoryIndex) 
-		{
-			case "hTop":  lineHolder = Instantiate (line, instance[1].transform.position, Quaternion.identity, instance[1].transform) as GameObject; break;
-			case "hMid":  lineHolder = Instantiate (line, instance[4].transform.position, Quaternion.identity, instance[4].transform) as GameObject; break;
-			case "hBot":  lineHolder = Instantiate (line, instance[7].transform.position, Quaternion.identity, instance[7].transform) as GameObject; break;
-			case "dLR":   lineHolder = Instantiate (line, instance[4].transform.position, Quaternion.Euler(0,0,-45), instance[4].transform) as GameObject; break;
-			case "dRL":   lineHolder = Instantiate (line, instance[4].transform.position, Quaternion.Euler(0,0,180 + 45), instance[4].transform) as GameObject; break;
-			case "vLeft": lineHolder = Instantiate (line, instance[3].transform.position, Quaternion.Euler(0,0,-90), instance[1].transform) as GameObject; break;
-			case "vMid":  lineHolder = Instantiate (line, instance[4].transform.position, Quaternion.Euler(0,0,-90), instance[1].transform) as GameObject; break;
-			case "vRight":lineHolder = Instantiate (line, instance[5].transform.position, Quaternion.Euler(0,0,-90), instance[1].transform) as GameObject; break;
+		if (victoryIndex != "tie") {
+			switch (victoryIndex) {
+			case "hTop":
+				lineHolder = Instantiate (line, instance [1].transform.position, Quaternion.identity, instance [1].transform) as GameObject;
+				break;
+			case "hMid":
+				lineHolder = Instantiate (line, instance [4].transform.position, Quaternion.identity, instance [4].transform) as GameObject;
+				break;
+			case "hBot":
+				lineHolder = Instantiate (line, instance [7].transform.position, Quaternion.identity, instance [7].transform) as GameObject;
+				break;
+			case "dLR":
+				lineHolder = Instantiate (line, instance [4].transform.position, Quaternion.Euler (0, 0, -45), instance [4].transform) as GameObject;
+				break;
+			case "dRL":
+				lineHolder = Instantiate (line, instance [4].transform.position, Quaternion.Euler (0, 0, 180 + 45), instance [4].transform) as GameObject;
+				break;
+			case "vLeft":
+				lineHolder = Instantiate (line, instance [3].transform.position, Quaternion.Euler (0, 0, -90), instance [1].transform) as GameObject;
+				break;
+			case "vMid":
+				lineHolder = Instantiate (line, instance [4].transform.position, Quaternion.Euler (0, 0, -90), instance [1].transform) as GameObject;
+				break;
+			case "vRight":
+				lineHolder = Instantiate (line, instance [5].transform.position, Quaternion.Euler (0, 0, -90), instance [1].transform) as GameObject;
+				break;
+			}
 		}
 	}
 }

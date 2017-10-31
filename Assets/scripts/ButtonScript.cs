@@ -3,21 +3,22 @@ using UnityEngine.UI;
 using System.Collections;
 
 public class ButtonScript : MonoBehaviour {
+	//publics
 	public GameObject crossL, crossR, circle;
 	public int index;
 	public enum Value {none, circle, cross};
 	public Value cellValue;
 	public float speed = 10.0f;
 	public float animSpeed = 2f;
+	public bool draw;
 	public AudioClip crossSFX, circleSFX;
-
+	//statics
 	public static int copyIndex = 0;
 	private static GameObject[] copy = new GameObject[15];
-
-	[SerializeField]private GameObject[] display = new GameObject[15];
-	private GameObject playerGMturn = null;
+	//privates
 	[SerializeField]private bool localTurn;
-	private static int activeCount = 0;
+	[SerializeField]private static int activeCount = 0;
+	private GameObject playerGMturn = null;
 	private Button btn = null;
 	private GMScript gmScript;
 	private Animation anim;
@@ -34,6 +35,7 @@ public class ButtonScript : MonoBehaviour {
 		gmScript = playerGMturn.GetComponent<GMScript>();
 
 		aSrc = GetComponent<AudioSource>();
+		draw = false;
 	}
 	void Update ()
 	{
@@ -44,11 +46,17 @@ public class ButtonScript : MonoBehaviour {
 	{
 		if (Input.GetMouseButtonUp (0)) {
 			localTurn = gmScript.playerOneTurn;
-			if (localTurn) 
-				 { DrawSign ("cross"); this.cellValue = Value.cross; } 
-			else { DrawSign ("circle"); this.cellValue = Value.circle; }
-			if (activeCount > 4)
-				gmScript.CheckVictory(localTurn);
+			if (localTurn) {
+				DrawSign ("cross");
+				this.cellValue = Value.cross;
+			} else {
+				DrawSign ("circle");
+				this.cellValue = Value.circle;
+			}
+			if (activeCount == 9) {
+				gmScript.Tie();
+			} else if (activeCount > 4)
+				gmScript.CheckVictory (localTurn);
 		}
 	}
 
@@ -102,6 +110,6 @@ public class ButtonScript : MonoBehaviour {
 			copy[i] = null;
 		} 
 		copyIndex = 0;
-
+		activeCount = 0;
 	}
 }
